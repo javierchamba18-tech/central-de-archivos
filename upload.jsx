@@ -2,7 +2,7 @@
 (function () {
   const { useState } = React;
   const { Icon, Modal, FileGlyph, StatusPill, toast } = window;
-  const { companies, docTypes, sites } = window.AppData;
+  const { companies, docTypes, sites, costCenters } = window.AppData;
 
   const NONE = "__none__";
   const isSet = (v) => v !== "" && v != null && v !== NONE;
@@ -102,6 +102,17 @@
             docTypes.map((d) => React.createElement("option", { key: d.code, value: d.code }, d.name))
           )
         ),
+        React.createElement(Field, { label: "Centro de costos" },
+          React.createElement("select", {
+            className: "mini-select", value: selRow.site || NONE,
+            onChange: (e) => update(selRow.id, "site", e.target.value === NONE ? null : e.target.value)
+          },
+            React.createElement("option", { value: NONE }, "Sin asignar"),
+            costCenters
+              .filter((cc) => !selRow.company || cc.companyId === Number(selRow.company))
+              .map((cc) => React.createElement("option", { key: cc.id, value: cc.id }, cc.id + " · " + cc.name))
+          )
+        ),
 
         // Datos colapsables
         React.createElement("div", { className: "dp-divider" }),
@@ -111,17 +122,8 @@
           React.createElement(Icon, { name: showDatos ? "chevD" : "chevR", size: 14 }),
           "Datos del archivo"
         ),
-        !showDatos ? React.createElement("div", { className: "dp-collapse-hint-block" }, "Sitio · folio · comentarios · fecha") : null,
+        !showDatos ? React.createElement("div", { className: "dp-collapse-hint-block" }, "Folio · comentarios · fecha") : null,
         showDatos ? React.createElement(React.Fragment, null,
-          React.createElement(Field, { label: "Sitio" },
-            React.createElement("select", {
-              className: "mini-select", value: selRow.site,
-              onChange: (e) => update(selRow.id, "site", e.target.value)
-            },
-              React.createElement("option", { value: NONE }, "Sin asignar"),
-              sites.map((s) => React.createElement("option", { key: s, value: s }, s))
-            )
-          ),
           React.createElement(Field, { label: "Folio" },
             React.createElement("input", {
               className: "mini-input", placeholder: "Ej. C-0091",
@@ -240,6 +242,16 @@
           docTypes.map((d) => React.createElement("option", { key: d.code, value: d.code }, d.name))
         )
       ),
+      React.createElement("div", { className: "dp-field" },
+        React.createElement("div", { className: "dp-label" }, "Centro de costos"),
+        React.createElement("select", {
+          className: "mini-select", defaultValue: NONE,
+          onChange: (e) => { if (isSet(e.target.value)) { bulkSet("site", e.target.value); e.target.value = NONE; } }
+        },
+          React.createElement("option", { value: NONE }, "— Sin cambio —"),
+          costCenters.map((cc) => React.createElement("option", { key: cc.id, value: cc.id }, cc.id + " · " + cc.name))
+        )
+      ),
 
       React.createElement("div", { className: "dp-divider" }),
       React.createElement(
@@ -248,18 +260,8 @@
         React.createElement(Icon, { name: showDatos ? "chevD" : "chevR", size: 14 }),
         "Datos del archivo"
       ),
-      !showDatos ? React.createElement("div", { className: "dp-collapse-hint-block" }, "Sitio · folio · fecha") : null,
+      !showDatos ? React.createElement("div", { className: "dp-collapse-hint-block" }, "Folio · fecha") : null,
       showDatos ? React.createElement(React.Fragment, null,
-        React.createElement("div", { className: "dp-field" },
-          React.createElement("div", { className: "dp-label" }, "Sitio"),
-          React.createElement("select", {
-            className: "mini-select", defaultValue: NONE,
-            onChange: (e) => { if (isSet(e.target.value)) { bulkSet("site", e.target.value); e.target.value = NONE; } }
-          },
-            React.createElement("option", { value: NONE }, "— Sin cambio —"),
-            sites.map((s) => React.createElement("option", { key: s, value: s }, s))
-          )
-        ),
         React.createElement("div", { className: "dp-field" },
           React.createElement("div", { className: "dp-label" }, "Folio"),
           React.createElement("input", {
